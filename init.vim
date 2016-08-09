@@ -1,4 +1,4 @@
-" Plugin {
+    " Plugin {
     " Instalation {
         call plug#begin('~/.config/nvim/plugged')
     " }
@@ -23,6 +23,7 @@
     Plug 'timonv/vim-cargo', { 'for': 'rust' }
     Plug 'racer-rust/vim-racer', { 'for': 'rust' }
     Plug 'sebastianmarkow/deoplete-rust', { 'for': 'rust' }
+    Plug 'rhysd/rust-doc.vim', { 'for': 'rust' }
 
     " go
     Plug 'fatih/vim-go', { 'for': 'go' }
@@ -53,12 +54,15 @@
     let g:AutoPairsFlyMode = 0 " 0 enables Autopairs by default at startup
     let g:AutoPairsShortcutBackInsert = '<M-b>'
 
+    " rust-doc
+    let g:rust_doc#downloaded_rust_doc_dir = '~/.multirust/toolchains/nightly-x86_64-apple-darwin'
+
     " Ultisnips settings
     " If you want :UltiSnipsEdit to split your window.
     inoremap <silent><expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-    let g:UltisnipsExpandTrigger='<tab>'
-    let g:UltisnipsJumpForwardTrigger='<tab>'
-    let g:UltisnipsJumpBackwardTrigger='<s-tab>'
+    let g:UltisnipsExpandTrigger='<c-w>'
+    let g:UltisnipsJumpForwardTrigger='<c-l>'
+    let g:UltisnipsJumpBackwardTrigger='<c-L>'
     let g:UltiSnipsSnippetDirectories=[$HOME.'/.config/nvim/plugged/ultisnips/UltiSnips']
 
     " Add mapping to make ctrl space go to next completion option
@@ -78,7 +82,7 @@
     let g:racer_cmd = '/Users/ag/.cargo/bin/racer'
     let g:cargo_command = '!cargo {cmd}'
     let $CARGO_HOME='/Users/ag/.cargo'
-    " let $RUST_SRC_PATH='/Users/ag/.config/nvim/plugged/rust/src'
+    "let $RUST_SRC_PATH='/Users/ag/.config/nvim/plugged/rust/src'
 
     " tagbar settings
     let g:tagbar_type_rust = {
@@ -118,7 +122,10 @@
     au FileType go map <leader>gc <Plug>(go-coverage)
 
     filetype plugin indent on    " Automatically detect file types
-    colorscheme solarized
+
+    colorscheme bubblegum
+    let g:seoul256_light_background = 256
+
     syntax on           " Syntax highlighting
 
     if has('clipboard')
@@ -184,6 +191,7 @@
 "
     set wrap                        " wrap long lines
     set autoindent                  " Indent at the same level of the previous line
+    set smartindent
     set shiftwidth=4                " Use indents of 4 spaces
     set expandtab                   " Tabs are spaces, not tabs
     set tabstop=4                   " An indentation every four columns
@@ -199,11 +207,31 @@
     " .vimrc.before.local file:
     "   let g:neovim_keep_trailing_whitespace = 1
     autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,xml,yml,perl,sql autocmd BufWritePre <buffer> if !exists('g:neovim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
-    "autocmd FileType go autocmd BufWritePre <buffer> Fmt
-    autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
-    " preceding line best in a plugin but here for now.
 
-    autocmd BufNewFile,BufRead *.coffee set filetype=coffee
+    autocmd FileType rust set tabstop=4
+    autocmd FileType rust set textwidth=99
+    autocmd FileType rust set wrap
+    autocmd FileType rust set shiftwidth=4
+    autocmd FileType rust set softtabstop=4
+
+    autocmd FileType html set tabstop=2
+    autocmd FileType html set shiftwidth=2
+    autocmd FileType html set softtabstop=2
+
+    autocmd FileType mustache set tabstop=2
+    autocmd FileType mustache set shiftwidth=2
+    autocmd FileType mustache set softtabstop=2
+
+    autocmd FileType python set tabstop=8
+    autocmd FileType python set expandtab
+    autocmd FileType python set shiftwidth=4
+    autocmd FileType python set softtabstop=4
+
+    autocmd FileType go set tabstop=8
+    autocmd FileType go set textwidth=99
+    autocmd FileType go set wrap
+    autocmd FileType go set shiftwidth=8
+    autocmd FileType go set softtabstop=8
 
     " Workaround vim-commentary for Haskell
     autocmd FileType haskell setlocal commentstring=--\ %s
@@ -266,7 +294,8 @@
     let maplocalleader='\\'
 
     " open and edit init.vim
-    nnoremap <leader>ev :tabe ~/.config/nvim/init.vim<cr>
+    nnoremap <leader>ev :tabe ~/.config/nvim/init.vim<CR>>
+    nnoremap <leader>es :source ~/.config/nvim/init.vim<CR>
 
     vnoremap < <gv " Visual shifting (does not exit Visual mode)
     vnoremap > >gv
@@ -389,6 +418,6 @@
     map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 
     " Nice to have for Neovim
-    set spell spelllang=en_us
+    nmap <Leader>S <ESC>:setlocal spell spelllang=en_us<CR>
 " }
 
