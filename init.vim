@@ -1,423 +1,358 @@
-    " Plugin {
-    " Instalation {
-        call plug#begin('~/.config/nvim/plugged')
-    " }
-
-    " Base Plugins
-    "
-    Plug 'scrooloose/NERDTree'
-    Plug 'Xuyuanp/nerdtree-git-plugin'
-    Plug 'tpope/vim-surround'
-    Plug 'tpope/vim-commentary'
-
-    " autocomplete
-    function! DoRemote(arg)
-        UpdateRemotePlugins
-    endfunction
-    Plug 'Shougo/deoplete.nvim', { 'do': function('DoRemote') }
-    Plug 'SirVer/ultisnips'
-
-    " rust
-    Plug 'rust-lang/rust.vim', { 'for': 'rust' }
-    Plug 'rust-lang/rust', {'for': 'none'}
-    Plug 'timonv/vim-cargo', { 'for': 'rust' }
-    Plug 'racer-rust/vim-racer', { 'for': 'rust' }
-    Plug 'sebastianmarkow/deoplete-rust', { 'for': 'rust' }
-    Plug 'rhysd/rust-doc.vim', { 'for': 'rust' }
-
-    " go
-    Plug 'fatih/vim-go', { 'for': 'go' }
-    Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go' }
-
-    " fast file switcher - fuzzy finder
-    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-    Plug 'junegunn/fzf.vim'
-
-    " others
-    Plug 'jiangmiao/auto-pairs'
-    Plug 'majutsushi/tagbar'
-    Plug 'rhysd/try-colorscheme.vim'
-
-    call plug#end()
-" }
-
-" General {
-"
-    if &term =~ '256color'
-      " disable Background Color Erase (BCE) so that color schemes
-      " render properly when inside 256-color tmux and GNU screen.
-      " see also http://snk.tuxfamily.org/log/vim-256color-bce.html
-      set t_ut=
-    endif
-
-    " auto-pairs
-    let g:AutoPairsFlyMode = 0 " 0 enables Autopairs by default at startup
-    let g:AutoPairsShortcutBackInsert = '<M-b>'
-
-    " rust-doc
-    let g:rust_doc#downloaded_rust_doc_dir = '~/.multirust/toolchains/nightly-x86_64-apple-darwin'
-
-    " Ultisnips settings
-    " If you want :UltiSnipsEdit to split your window.
-    inoremap <silent><expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-    let g:UltisnipsExpandTrigger='<c-w>'
-    let g:UltisnipsJumpForwardTrigger='<c-l>'
-    let g:UltisnipsJumpBackwardTrigger='<c-L>'
-    let g:UltiSnipsSnippetDirectories=[$HOME.'/.config/nvim/plugged/ultisnips/UltiSnips']
-
-    " Add mapping to make ctrl space go to next completion option
-    " <Nul> is interpreted as ctrl-space
-    inoremap <Nul> <C-n>
-
-    " deoplete settings
-    let g:deoplete#enable_at_startup = 1 " Use deoplete.
-    let g:deoplete#enable_smart_case = 1
-    let g:deoplete#omni_patterns = {}
-
-    " deoplete-rust settings
-    let g:rustfmt_autosave = 1
-    let g:deoplete#sources#rust#racer_binary='/Users/ag/.cargo/bin/racer'
-    let g:deoplete#sources#rust#rust_source_path='/Users/ag/.config/nvim/plugged/rust/src'
-    let g:deoplete#omni_patterns.rust = '[(\.)(::)]'
-    let g:racer_cmd = '/Users/ag/.cargo/bin/racer'
-    let g:cargo_command = '!cargo {cmd}'
-    let $CARGO_HOME='/Users/ag/.cargo'
-    "let $RUST_SRC_PATH='/Users/ag/.config/nvim/plugged/rust/src'
-
-    " tagbar settings
-    let g:tagbar_type_rust = {
-            \ 'ctagstype' : 'rust',
-            \ 'kinds' : [
-            \'T:types,type definitions',
-            \'f:functions,function definitions',
-            \'g:enum,enumeration names',
-            \'s:structure names',
-            \'m:modules,module names',
-            \'c:consts,static constants',
-            \'t:traits,traits',
-            \'i:impls,trait implementations',
-            \]
-            \}
-
-    au FileType rust map <leader>cr :wa<CR> :CargoRun<CR>
-    au FileType rust map <leader>cb :wa<CR> :CargoBuild<CR>
-    au FileType rust map <leader>ct :wa<CR> :CargoTest<CR>
-
-    " deoplete-go settings
-    let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
-    let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-
-    let g:go_highlight_functions = 1
-    let g:go_highlight_methods = 1
-    let g:go_highlight_structs = 1
-    let g:go_highlight_interfaces = 1
-    let g:go_highlight_operators = 1
-    let g:go_highlight_build_constraints = 1
-    let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
-    let g:go_auto_type_info = 1
-
-    au FileType go map <leader>gr <Plug>(go-run)
-    au FileType go map <leader>gb <Plug>(go-build)
-    au FileType go map <leader>gt <Plug>(go-test)
-    au FileType go map <leader>gc <Plug>(go-coverage)
-
-    filetype plugin indent on    " Automatically detect file types
-
-    colorscheme bubblegum
-    let g:seoul256_light_background = 256
-
-    syntax on           " Syntax highlighting
-
-    if has('clipboard')
-        if has('unnamedplus')  " When possible use + register for copy-paste
-            set clipboard=unnamed,unnamedplus
-        else         " On mac and Windows, use * register for copy-paste
-            set clipboard=unnamed
-        endif
-    endif
-" }
-
-" UI {
-    if has('cmdline_info')
-        set ruler                   " Show the ruler
-        set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%) " A ruler on steroids
-        set showcmd                 " Show partial commands in status line and
-                                    " Selected characters/lines in visual mode
-    endif
-
-    if has('statusline')
-        set laststatus=2
-
-        " Broken down into easily includeable segments
-        set statusline=%<%f\                     " Filename
-        set statusline+=%w%h%m%r                 " Options
-        " this does not work yet, maybe we should remove it and have a simpler status line
-        "if !exists('g:override_spf13_bundles')
-        "    set statusline+=%fugitive#statusline() " Git Hotness
-        "endif
-        "set statusline+=\ [%&ff/%Y]            " Filetype
-        "set statusline+=\ [%getcwd()]          " Current dir
-        "set statusline+=%=%-14.(%l,%c%V%)\ %p%%  " Right aligned file nav info
-    endif
-
-    " Relative line numbers toggle
-    autocmd InsertEnter * :set relativenumber!
-    autocmd InsertLeave * :set relativenumber
-    au FocusLost * :set relativenumber!
-    au FocusGained * :set relativenumber
-    au BufEnter * :set relativenumber
-    au BufLeave * :set relativenumber!
-
-    set backspace=indent,eol,start  " Backspace for dummies
-    set linespace=0                 " No extra spaces between rows
-    set number                      " Line numbers on
-    set showmatch                   " Show matching brackets/parenthesis
-    set incsearch                   " Find as you type search
-    set hlsearch                    " Highlight search terms
-    set winminheight=0              " Windows can be 0 line high
-    set ignorecase                  " Case insensitive search
-    set smartcase                   " Case sensitive when uc present
-    set wildmenu                    " Show list instead of just completing
-    set wildmode=list:longest,full  " Command <Tab> completion, list matches, then longest common part, then all.
-    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
-    set scrolljump=5                " Lines to scroll when cursor leaves screen
-    set scrolloff=3                 " Minimum lines to keep above and below cursor
-    set foldenable                  " Auto fold code
-    set list
-    set listchars=tab:›\ ,trail:•,extends:#,nbsp:. " Highlight problematic whitespace
-" }
-
-" Formatting {
-"
-    set wrap                        " wrap long lines
-    set autoindent                  " Indent at the same level of the previous line
-    set smartindent
-    set shiftwidth=4                " Use indents of 4 spaces
-    set expandtab                   " Tabs are spaces, not tabs
-    set tabstop=4                   " An indentation every four columns
-    set softtabstop=4               " Let backspace delete indent
-    set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
-    set splitright                  " Puts new vsplit windows to the right of the current
-    set splitbelow                  " Puts new split windows to the bottom of the current
-    "set matchpairs+=<:>             " Match, to be used with %
-    set pastetoggle=<F12>           " pastetoggle (sane indentation on pastes)
-    "set comments=sl:/*,mb:*,elx:*/  " auto format comment blocks
-    " Remove trailing whitespaces and ^M chars
-    " To disable the stripping of whitespace, add the following to your
-    " .vimrc.before.local file:
-    "   let g:neovim_keep_trailing_whitespace = 1
-    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,xml,yml,perl,sql autocmd BufWritePre <buffer> if !exists('g:neovim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
-
-    autocmd FileType rust set tabstop=4
-    autocmd FileType rust set textwidth=99
-    autocmd FileType rust set wrap
-    autocmd FileType rust set shiftwidth=4
-    autocmd FileType rust set softtabstop=4
-
-    autocmd FileType html set tabstop=2
-    autocmd FileType html set shiftwidth=2
-    autocmd FileType html set softtabstop=2
-
-    autocmd FileType mustache set tabstop=2
-    autocmd FileType mustache set shiftwidth=2
-    autocmd FileType mustache set softtabstop=2
-
-    autocmd FileType python set tabstop=8
-    autocmd FileType python set expandtab
-    autocmd FileType python set shiftwidth=4
-    autocmd FileType python set softtabstop=4
-
-    autocmd FileType go set tabstop=8
-    autocmd FileType go set textwidth=99
-    autocmd FileType go set wrap
-    autocmd FileType go set shiftwidth=8
-    autocmd FileType go set softtabstop=8
-
-    " Workaround vim-commentary for Haskell
-    autocmd FileType haskell setlocal commentstring=--\ %s
-    " Workaround broken colour highlighting in Haskell
-    autocmd FileType haskell,rust setlocal nospell
-" }
-
-" Functions {
-"
-    " Relative line number toggle key
-    function! NumberToggle()
-        if(&relativenumber == 1)
-            set number
-        else
-            set relativenumber
-        endif
-    endfunction
-
-    " Strip whitespace {
-    function! StripTrailingWhitespace()
-        " Preparation: save last search, and cursor position.
-        let _s=@/
-        let l = line(".")
-        let c = col(".")
-        " do the business:
-        %s/\s\+$//e
-        " clean up: restore previous search history, and cursor position
-        let @/=_s
-        call cursor(l, c)
-    endfunction
-
-    function! VisualSelection(direction, extra_filter) range
-        let l:saved_reg = @"
-        execute "normal! vgvy"
-
-        let l:pattern = escape(@", '\\/.*$^~[]')
-        let l:pattern = substitute(l:pattern, "\n$", "", "")
-
-        if a:direction == 'b'
-            execute "normal ?" . l:pattern . "^M"
-        elseif a:direction == 'gv'
-            call CmdLine("Ag \"" . l:pattern . "\" " )
-        elseif a:direction == 'replace'
-            call CmdLine("%s" . '/'. l:pattern . '/')
-        elseif a:direction == 'f'
-            execute "normal /" . l:pattern . "^M"
-        endif
-
-        let @/ = l:pattern
-        let @" = l:saved_reg
-    endfunction
-    " }
-" }
-
-" Key mapping {
-"
-    " Note that Mac command key is not sent by the terminal, thus not available
-    " fdsafds fdsafds f dsafds llfda 
-    let mapleader=','
-    let maplocalleader='\\'
-
-    " open and edit init.vim
-    nnoremap <leader>ev :tabe ~/.config/nvim/init.vim<CR>>
-    nnoremap <leader>es :source ~/.config/nvim/init.vim<CR>
-
-    vnoremap < <gv " Visual shifting (does not exit Visual mode)
-    vnoremap > >gv
-
-    " Easier moving in tabs and windows
-    "map <C-J> <C-W>j<C-W>_
-    "map <C-K> <C-W>k<C-W>_
-    "map <C-L> <C-W>l<C-W>_
-    "map <C-H> <C-W>h<C-W>_
-    "This is based on the golang setup, which might be better
-    map <C-J> <C-W>j
-    map <C-K> <C-W>k
-    map <C-L> <C-W>l
-    map <C-H> <C-W>h
-
-    " when wrapped is on, go to virual line instead of line in file 
-    noremap j gj
-    noremap k gk
-
-    " Yank from the cursor to the end of the line
-    nnoremap Y y$
-
-    " Display toggle tagbar ( conflicts with byobu tmux setup)  **FIX ME!!
-    " nmap <F8> :TagbarToggle<CR>
-
-    " disable search highlight
-    nmap <silent> <leader>/ :nohlsearch<CR>
-
-    " Find merge conflict markers
-    map <leader>fc /\v^[<\|=>]{7}( .*\|$)<CR>
-
-    " Allow using the repeat operator with a visual selection (!)
-    " http://stackoverflow.com/a/8064607/127816
-    vnoremap . :normal .<CR>
-
-    " Adjust viewports to the same size
-    map <Leader>= <C-w>=
-
-    " Map <Leader>fw to display all lines with keyword under cursor
-    " and ask which one to jump to
-    nmap <Leader>fw [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
-
-    " Simply zl/zh to scroll horizontally
-    map zl zL
-    map zh zH
-
-    " Easier formatting
-    " Not sure how that works yet
-    " nnoremap <silent> <leader>q gwip
-
-    " FZF {
-        " Fuzzy Open files
-        nnoremap <silent> <leader>o :Files<CR>
-
-        " Fuzzy open git files
-        nnoremap <silent> <leader>g :GitFiles<CR>
-
-        " Fuzzy open buffer
-        nnoremap <silent> <leader>b :Buffers<CR>
-
-        vnoremap <silent> gv :call VisualSelection('gv', '')<CR> 
-
-    " }
-    " NERDTree {
-
-        " Locate file in hierarchy quickly
-        map <leader>n :NERDTreeFind<cr>
-
-        " Toggle on/off
-        map <leader>nn : NERDTreeToggle<cr>
-
-    " }
-
-    " Switch be3tween the last two files
-    nnoremap <leader><leader> <C-^>
-
-    " write and quit
-    nnoremap <leader>ww :wq<CR>
-    nnoremap <leader>w :w<CR>
-    nnoremap <leader>q :q<CR>
-    nnoremap <leader>qq :q!<CR>
-
-    " Allow to copy/paste between VIM instances
-    "copy the current visual selection to ~/.vbuf
-    vmap <leader>y :w! ~/.vbuf<cr>
-
-    "copy the current line to the buffer file if no visual selection
-    nmap <leader>y :.w! ~/.vbuf<cr>
-
-    "paste the contents of the buffer file
-    nmap <leader>p :r ~/.vbuf<cr>
-
-    " Make sure that CTRL-A (used by gnu screen) is redefined
-    noremap <leader>inc <C-A>
-
-    " Fast saving
-    map <Leader>w :w<CR>
-    imap <Leader>w <ESC>:w<CR>
-    vmap <Leader>w <ESC><ESC>:w<CR>
-
-    " This is totally awesome - remap jj to escape in insert mode.  You'll never type jj anyway, so it's great!
-    inoremap jj <esc>
-    nnoremap JJJJ <nop>
-
-    " Useful mappings for managing tabs (not sure if I like it) 
-    map <leader>tn :tabnew<cr>
-    map <leader>to :tabonly<cr>
-    map <leader>tc :tabclose<cr>
-    map <leader>tm :tabmove<cr>
-    map <leader>tj :tabnext<cr>
-    map <leader>tk :tabprevious<cr>
-
-    " Let 'tl' toggle between this and the last accessed tab
-    let g:lasttab = 1
-    nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
-    au TabLeave * let g:lasttab = tabpagenr()
-
-    " Opens a new tab with the current buffer's path
-    " Super useful when editing files in the same directory
-    map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
-
-    " Nice to have for Neovim
-    nmap <Leader>S <ESC>:setlocal spell spelllang=en_us<CR>
-" }
+" plugins
+
+call plug#begin('~/.local/share/nvim/plugged')
+
+"" color
+
+Plug 'cocopon/iceberg.vim'
 
+"" misc
+
+Plug 'Chiel92/vim-autoformat'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'easymotion/vim-easymotion'
+Plug 'jiangmiao/auto-pairs'
+Plug 'justinmk/vim-sneak'
+Plug 'maxbrunsfeld/vim-yankstack'
+Plug 'pbrisbin/vim-mkdir'
+Plug 'plasticboy/vim-markdown'
+Plug 'raviqqe/vim-non-blank'
+Plug 'raviqqe/vim-pastplace'
+Plug 'thinca/vim-quickrun'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-sleuth'
+Plug 'tpope/vim-surround'
+Plug 'vim-scripts/vim-auto-save'
+Plug 'itchyny/lightline.vim'
+Plug 'w0rp/ale'
+Plug 'wellle/targets.vim'
+Plug 'majutsushi/tagbar'
+
+"" fuzzy finder
+
+Plug 'junegunn/fzf', { 'do': './install --bin' }
+Plug 'junegunn/fzf.vim'
+
+"" Python
+
+Plug 'alfredodeza/pytest.vim'
+Plug 'zchee/deoplete-jedi'
+
+"" Go
+
+Plug 'fatih/vim-go'
+Plug 'zchee/deoplete-go'
+
+"" Rust
+
+Plug 'phildawes/racer'
+Plug 'racer-rust/vim-racer'
+Plug 'rust-lang-nursery/rustfmt'
+Plug 'rust-lang/rust.vim'
+Plug 'sebastianmarkow/deoplete-rust'
+
+"" Elm
+Plug 'elmcast/elm-vim'
+Plug 'pbogut/deoplete-elm'
+
+"" Js && Jsx
+Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
+
+"" deoplete
+
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'Shougo/neosnippet.vim'
+Plug 'Shougo/neosnippet-snippets'
+Plug 'honza/vim-snippets'
+
+"" operators
+
+Plug 'kana/vim-operator-user'
+Plug 'emonkak/vim-operator-sort'
+
+"" text objects
+
+Plug 'kana/vim-textobj-user'
+Plug 'bps/vim-textobj-python'
+Plug 'kana/vim-textobj-indent'
+Plug 'kana/vim-textobj-line'
+Plug 'thinca/vim-textobj-comment'
+Plug 'junegunn/vim-easy-align'
+
+call plug#end()
+
+" pure vim
+
+augroup Rc
+	autocmd!
+augroup END
+
+set autoread
+set ttyfast
+set nolazyredraw
+set nobackup
+set nowritebackup
+set swapfile
+set visualbell
+set tildeop
+set wildmenu
+set wildmode=full
+filetype plugin indent on
+autocmd Rc BufWinEnter * set mouse=
+
+"" tab setting
+
+set autoindent
+set expandtab
+set smartindent
+set shiftround
+set smarttab
+set shiftwidth=2
+set tabstop=2
+set list
+
+autocmd Filetype elm setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+
+"" appearance
+
+syntax on
+set number
+set relativenumber
+set colorcolumn=80
+set clipboard=unnamed
+set showmatch
+set showmode
+set showcmd
+set wrap
+set inccommand=nosplit
+set incsearch
+set hlsearch
+set splitbelow
+set splitright
+set cursorline
+set backspace=indent,eol,start
+set completeopt=menu
+autocmd Rc BufRead,BufNewFile *.jl set filetype=julia
+autocmd Rc BufRead,BufNewFile *.tisp set filetype=tisp
+autocmd Rc BufRead,BufNewFile *.ts set filetype=typescript
+autocmd Rc BufRead,BufNewFile *.aiml set filetype=text
+autocmd Rc BufRead,BufNewFile *.rules set filetype=text
+autocmd Rc FileType sh set filetype=zsh
+
+"" keymaps
+
+let g:mapleader = ","
+let maplocalleader = '\\'
+
+nnoremap ; :
+nnoremap : ;
+vnoremap ; :
+vnoremap : ;
+vnoremap . :normal .<CR>
+
+nnoremap <expr> j v:count ? 'j' : 'gj'
+nnoremap <expr> k v:count ? 'k' : 'gk'
+nnoremap gj j
+nnoremap gk k
+nnoremap <esc><esc> :nohlsearch<cr>
+nnoremap <leader>w :w<cr>
+nnoremap <leader>ww :wq<cr>
+nnoremap <leader>q :q<cr>
+nnoremap Q :q!<cr>
+nnoremap Y y$
+
+" open and edit init.vim
+nnoremap <leader>te :tabe ~/.config/nvim/init.vim<CR>>
+nnoremap <leader>es :source ~/.config/nvim/init.vim<CR>
+
+inoremap jj <Esc>
+inoremap <c-h> <left>
+inoremap <c-j> <down>
+inoremap <c-k> <up>
+inoremap <c-l> <right>
+
+cnoremap <c-h> <left>
+cnoremap <c-j> <c-n>
+cnoremap <c-k> <c-p>
+cnoremap <c-l> <right>
+
+" clipboard
+if has('clipboard')
+	if has('unnamedplus')  " When possible use + register for copy-paste
+		set clipboard=unnamed,unnamedplus
+	else         " On mac and Windows, use * register for copy-paste
+		set clipboard=unnamed
+	endif
+endif
+
+" Allow to copy/paste between VIM instances
+"copy the current visual selection to ~/.vbuf
+vmap <leader>y :w! ~/.vbuf<cr>
+"copy the current line to the buffer file if no visual selection
+nmap <leader>y :.w! ~/.vbuf<cr>
+"paste the contents of the buffer file
+nmap <leader>p :r ~/.vbuf<cr>
+" Make sure that CTRL-A (used by gnu screen) is redefined
+noremap <leader>inc <C-A>
+
+" Useful mapping for managing tabs
+nnoremap <leader>k :tabnext<CR>
+nnoremap <leader>j :tabprevious<CR>
+
+" Spelling check for NeoVim
+nmap <leader>S <ESC>:setlocal spell spelllang=en_us<CR>
+
+
+" plugin settings
+
+"" deoplete
+
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#auto_complete_start_length = 1
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+
+
+"" deoplete-rust
+
+let g:deoplete#sources#rust#racer_binary = $HOME . '/.cargo/bin/racer'
+let g:deoplete#sources#rust#rust_source_path = $HOME . '/.rustup/toolchains/nightly-x86_64-apple-darwin/lib/rustlib/src/rust/src'
+
+
+"" neosnippet
+
+let g:neosnippet#enable_auto_clear_markers = 0
+let g:neosnippet#enable_snipmate_compatibility = 1
+let g:neosnippet#snippets_directory = [
+			\ '~/.config/nvim/snippets',
+			\ '~/.config/nvim/plugged/vim-snippets/snippets']
+imap <c-s> <plug>(neosnippet_expand_or_jump)
+smap <c-s> <plug>(neosnippet_expand_or_jump)
+xmap <c-s> <plug>(neosnippet_expand_target)
+
+"" tagbar
+
+set tags=tags,.git/tags
+nnoremap <leader>tb :TagbarToggle<cr>
+let g:rust_recommended_style = 0
+
+let g:tagbar_type_rust = {
+			\ 'ctagstype' : 'rust',
+			\ 'kinds' : [
+			\'T:types,type definitions',
+			\'f:functions,function definitions',
+			\'g:enum,enumeration names',
+			\'s:structure names',
+			\'m:modules,module names',
+			\'c:consts,static constants',
+			\'t:traits,traits',
+			\'i:impls,trait implementations',
+			\]
+			\}
+
+"" easymotion
+
+nmap <leader>s <plug>(easymotion-s)
+nmap <leader>/ <plug>(easymotion-sn)
+
+"" easyalign
+
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
+
+"" sneak
+
+nmap t <plug>Sneak_s
+nmap T <plug>Sneak_S
+xmap t <plug>Sneak_s
+xmap T <plug>Sneak_S
+omap t <plug>Sneak_s
+omap T <plug>Sneak_S
+
+let g:sneak#s_next = 1
+
+
+"" auto-pairs
+
+let g:AutoPairsFlyMode = 0 " 0 enables AutoPair by default at startup
+let g:AutoPairsShortcutBackInsert = '<M-b>'
+
+"" elm-vim
+
+let g:elm_format_autosave = 1
+
+
+"" markdown
+
+let g:vim_markdown_folding_disabled = 1
+
+
+"" quickrun
+
+let g:quickrun_config = get(g:, 'quickrun_config', {})
+let g:quickrun_config.clojure = {'command' : 'clojure'}
+
+
+"" fzf
+
+nnoremap <leader>b :Buffers<cr>
+nnoremap <leader>c :History:<cr>
+nnoremap <leader>f :Files<cr>
+nnoremap <leader>g :GFiles<cr>
+nnoremap <leader>h :Helptags<cr>
+nnoremap <leader>l :Lines<cr>
+nnoremap <leader>m :Maps<cr>
+nnoremap <leader>r :Ag<cr>
+nnoremap <leader>u :History<cr>
+
+
+"" autoformat
+
+autocmd Rc BufEnter,BufWinEnter,BufRead,BufNewFile *
+			\ if &filetype == "" | set filetype=text | endif
+autocmd Rc BufWrite * :Autoformat
+autocmd Rc FileType
+			\ conf,cucumber,diff,elm,gitrebase,groovy,markdown,sh,text,tisp,xdefaults,yaml,zsh
+			\ let b:autoformat_autoindent = 0
+let g:formatters_python = ['autopep8']
+let g:formatters_javascript = ['standard_javascript']
+let g:rustfmt_autosave=1
+
+
+"" ale
+
+let g:ale_linters = {
+			\ 'javascript' : ['standard'],
+			\ 'python': ['flake8', 'pylint'],
+			\ }
+let g:ale_javascript_standard_options = '--global describe --global it'
+
+"" Jsx syntax higlighting and indenting in .js
+let g:jsx_ext_required = 0
+
+"" auto-save
+
+let g:auto_save = 1
+let g:auto_save_in_insert_mode = 0
+let g:auto_save_silent = 1
+
+
+"" lightline
+
+let g:lightline = { 'colorscheme': 'seoul256' }
+
+
+"" colorscheme
+
+colorscheme iceberg
+
+highlight normal      ctermbg=none
+highlight nontext     ctermbg=none
+highlight endofbuffer ctermbg=none
+highlight vertsplit   cterm=none ctermfg=240 ctermbg=240
+highlight visual      cterm=bold ctermbg=Blue   ctermfg=none guifg=#000000 guibg=LightBlue
+highlight MatchParen  cterm=none ctermbg=214  ctermfg=15 gui=none guibg=#F4C713 guifg=#BA2525
