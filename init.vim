@@ -46,23 +46,25 @@ Plug 'zchee/deoplete-go'
 
 "" Rust
 
-Plug 'phildawes/racer'
-Plug 'racer-rust/vim-racer'
 Plug 'rust-lang-nursery/rustfmt'
 Plug 'rust-lang/rust.vim'
+Plug 'w0rp/ale'
 Plug 'sebastianmarkow/deoplete-rust'
 
 "" Elm
 Plug 'elmcast/elm-vim'
 Plug 'pbogut/deoplete-elm'
 
-"" Js && Jsx
+"" Js, Jsx, Vue, Typescript
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
+Plug 'leafgarland/typescript-vim'
+Plug 'posva/vim-vue'
 
 "" deoplete
 
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'sebastianmarkow/deoplete-clang2'
 Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neosnippet-snippets'
 Plug 'honza/vim-snippets'
@@ -80,6 +82,8 @@ Plug 'kana/vim-textobj-indent'
 Plug 'kana/vim-textobj-line'
 Plug 'thinca/vim-textobj-comment'
 Plug 'junegunn/vim-easy-align'
+Plug 'mattn/vim-sqlfmt'
+Plug 'lepture/vim-jinja'
 
 call plug#end()
 
@@ -139,6 +143,7 @@ autocmd Rc BufRead,BufNewFile *.tisp set filetype=tisp
 autocmd Rc BufRead,BufNewFile *.ts set filetype=typescript
 autocmd Rc BufRead,BufNewFile *.aiml set filetype=text
 autocmd Rc BufRead,BufNewFile *.rules set filetype=text
+autocmd Rc BufRead,BufNewFile *.html.tera set syntax=jinja
 autocmd Rc FileType sh set filetype=zsh
 
 "" keymaps
@@ -204,33 +209,59 @@ nnoremap <leader>j :tabprevious<CR>
 " Spelling check for NeoVim
 nmap <leader>S <ESC>:setlocal spell spelllang=en_us<CR>
 
+" required for NeoVim python config, OS-X with homebrew
+let g:python2_host_prog = '/usr/local/bin/python'
+let g:python3_host_prog = '/usr/local/bin/python3'
 
 " plugin settings
 
-"" deoplete
+"" deoplete settings
 
+" Enable with lazy loading
+au FileType rust compiler cargo
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#auto_complete_start_length = 1
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+" Use smartcase
+let g:deoplete#enable_smart_case = 1
+let g:deoplete#enable_refresh_always = 1
+let g:deoplete#auto_complete_start_length = 2
+" Clang
+let g:deoplete#sources#clang#executable = '/usr/bin/clang'
 
+" setup omnifuncs
+augroup omnifuncs
+	autocmd!
+	autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+	autocmd FileType html, markdown setlocal omnifunc=htmlcomplete#CompleteTags
+	autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+	autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+	autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+augroup end
+
+"" vim-sqlfmt'
+"" psql as default SQL accent
+let g:sql_type_default = 'pgsql'
 
 "" deoplete-rust
-
-let g:deoplete#sources#rust#racer_binary = $HOME . '/.cargo/bin/racer'
-let g:deoplete#sources#rust#rust_source_path = $HOME . '/.rustup/toolchains/nightly-x86_64-apple-darwin/lib/rustlib/src/rust/src'
-
+" let g:deoplete#sources#rust#racer_binary = $HOME . '/.cargo/bin/racer'
+let g:deoplete#sources#rust#rust_source_path = $RUST_SRC_PATH
+let g:deoplete#sources#rust#documentation_max_height=20
 
 "" neosnippet
-
 let g:neosnippet#enable_auto_clear_markers = 0
 let g:neosnippet#enable_snipmate_compatibility = 1
 let g:neosnippet#snippets_directory = [
 			\ '~/.config/nvim/snippets',
 			\ '~/.config/nvim/plugged/vim-snippets/snippets']
-imap <c-s> <plug>(neosnippet_expand_or_jump)
-smap <c-s> <plug>(neosnippet_expand_or_jump)
-xmap <c-s> <plug>(neosnippet_expand_target)
+imap <c-k>     <Plug>(neosnippet_expand_or_jump)
+smap <c-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <c-k>     <Plug>(neosnippet_expand_target)
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)": pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)": "\<TAB>"
+
+if has('conceal')
+	set conceallevel=2 concealcursor=i
+endif
+
 
 "" tagbar
 
@@ -302,7 +333,6 @@ let g:quickrun_config.clojure = {'command' : 'clojure'}
 nnoremap <leader>b :Buffers<cr>
 nnoremap <leader>c :History:<cr>
 nnoremap <leader>f :Files<cr>
-nnoremap <leader>g :GFiles<cr>
 nnoremap <leader>h :Helptags<cr>
 nnoremap <leader>l :Lines<cr>
 nnoremap <leader>m :Maps<cr>
@@ -325,13 +355,56 @@ let g:rustfmt_autosave=1
 
 "" ale
 
+let le_sign_column_always = 1
+let g:ale_set_highlights = 0
+let g:ale_completion_enabled = 1
+let g:ale_sign_error = '😡'
+let g:ale_sign_warning = '⚡️'
+
+highlight clear ALEErrorSign
+highlight clear ALEWarningSign
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_lint_on_enter = 0
+
+nnoremap <silent> K :ALEHover<CR>
+nnoremap <silent> gd :ALEGoToDefinition<CR>
+
 let g:ale_linters = {
-			\ 'javascript' : ['standard'],
+			\ 'rust': ['cargo', 'rls'],
+			\ 'go': ['golint', 'go vet', 'go build'],
 			\ 'python': ['flake8', 'pylint'],
+			\'javascript': ['eslint', 'stylelint'],
+			\'jsx': ['eslint', 'stylelint'],
 			\ }
+let g:ale_fixers = {'rust': ['rustfmt']}
 let g:ale_javascript_standard_options = '--global describe --global it'
+let b:ale_rust_rls_toolchain = "nightly"
+let g:ale_rust_rls_executable = $HOME . '/.cargo/bin/rls'
+
+let b:ale_rust_rls_config = {
+			\   "rust": {
+			\       "clippy_preference": "on"
+			\   }
+			\}
+
+let g:racer_path= $HOME . '/.cargo/bin/racer'
+let g:racer_experimental_completer = 1
+let $RUST_SRC_PATH = systemlist("rustc --print sysroot")[0] . "/lib/rustlib/src/rust/src"
+
+nmap gs <Plug>(rust-def-split)
+nmap gx <Plug>(rust-def-vertical)
+nmap <leader>gd <Plug>(rust-doc)
+
+if executable('racer')
+	let g:completor_racer_binary = 'racer'
+elseif executable(racer_path)
+	let g:completor_racer_binary = racer_path
+endif
 
 "" Jsx syntax higlighting and indenting in .js
+
 let g:jsx_ext_required = 0
 
 "" auto-save
@@ -354,5 +427,4 @@ highlight normal      ctermbg=none
 highlight nontext     ctermbg=none
 highlight endofbuffer ctermbg=none
 highlight vertsplit   cterm=none ctermfg=240 ctermbg=240
-highlight visual      cterm=bold ctermbg=Blue   ctermfg=none guifg=#000000 guibg=LightBlue
 highlight MatchParen  cterm=none ctermbg=214  ctermfg=15 gui=none guibg=#F4C713 guifg=#BA2525
